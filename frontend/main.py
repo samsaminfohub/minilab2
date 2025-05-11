@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import mysql.connector
+import os
 
 def charger_fichier_csv():
 
@@ -104,8 +106,52 @@ def main():
                 # Statistiques descriptives
                 st.subheader("Statistiques Descriptives")
                 st.write(df[colonne_selectionnee].describe())
+                # Enregistrement dans MySQL
+                if st.button("📥 Enregistrer les statistiques dans MySQL"):
+                    stats = df[colonne_selectionnee].describe()
+                    enregistrer_statistiques_mysql(colonne_selectionnee, stats)
+
             else:
                 st.warning("Aucune colonne numérique trouvée dans le fichier.")
+
+
+
+def enregistrer_statistiques_mysql(colonne, stats):
+    try:
+        conn = mysql.connector.connect(
+            host=os.getenv("DB_HOST", "localhost"),
+            user=os.getenv("DB_USER", "root"),
+            password=os.getenv("DB_PASSWORD", "rootpass"),
+            database=os.getenv("DB_NAME", "csvdb")
+        )
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS statistiques (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                colonne VARCHAR(100),
+                moyenne FLOAT,
+                ecart_type FLOAT,
+                minimum FLOAT,
+                maximum FLOAT
+            )
+        """)
+        cursor.execute("""
+            INSERT INTO statistiques (colonne, moyenne, ecart_type, minimum, maximum)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (
+            colonne,
+            stats['mean'],
+            stats['std'],
+            stats['min'],
+            stats['max']
+        ))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        st.success("Statistiques enregistrées dans la base MySQL ✅")
+    except Exception as e:
+        st.error(f"Erreur lors de l'enregistrement dans MySQL : {e}")
+
 
 if __name__ == "__main__":
     main()
