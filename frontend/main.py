@@ -140,10 +140,10 @@ def enregistrer_statistiques_mysql(colonne, stats):
             VALUES (%s, %s, %s, %s, %s)
         """, (
             colonne,
-            stats['mean'],
-            stats['std'],
-            stats['min'],
-            stats['max']
+            float(stats['mean']),
+            float(stats['std']),
+            float(stats['min']),
+            float(stats['max'])
         ))
         conn.commit()
         cursor.close()
