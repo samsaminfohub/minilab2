@@ -43,8 +43,9 @@ services:
     environment:
       DB_HOST: mysql
       DB_USER: root
-      DB_PASSWORD: app_password
+      DB_PASSWORD: root_password
       DB_NAME: csvdb
+
     networks:
       - app_network
 
