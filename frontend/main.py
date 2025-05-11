@@ -121,7 +121,7 @@ def enregistrer_statistiques_mysql(colonne, stats):
         conn = mysql.connector.connect(
             host=os.getenv("DB_HOST", "localhost"),
             user=os.getenv("DB_USER", "root"),
-            password=os.getenv("DB_PASSWORD", "root_password"),
+            password=os.getenv("DB_PASSWORD", "app_password"),
             database=os.getenv("DB_NAME", "csvdb")
         )
         cursor = conn.cursor()
