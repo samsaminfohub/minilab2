@@ -16,12 +16,17 @@ st.set_page_config(
 # Fonction pour vérifier la santé de l'API
 def check_api_health():
     try:
-        response = requests.get(f"{FASTAPI_URL}/health")
+        response = requests.get(f"{FASTAPI_URL}/health", timeout=5)
         if response.status_code == 200:
             return True, response.json()
-        return False, response.json()
+        return False, {"status": "error", "detail": f"Status code: {response.status_code}"}
+    except requests.exceptions.ConnectionError as e:
+        st.error(f"Impossible de se connecter à l'API FastAPI. Assurez-vous que le service 'fastapi' est en cours d'exécution.")
+        return False, {"error": "Connection refused", "detail": str(e)}
+    except requests.exceptions.Timeout:
+        return False, {"error": "Timeout", "detail": "L'API n'a pas répondu à temps"}
     except Exception as e:
-        return False, {"error": str(e)}
+        return False, {"error": str(e), "detail": str(e)}
 
 # Fonction pour obtenir tous les éléments
 def get_items():

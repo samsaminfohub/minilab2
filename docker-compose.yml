@@ -66,6 +66,12 @@ services:
       - app_network
     environment:
       FASTAPI_URL: http://fastapi:8000
+    restart: on-failure
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://fastapi:8000/health || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 networks:
   app_network:

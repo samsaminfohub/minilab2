@@ -77,7 +77,9 @@ def health_check():
         db.close()
         return {"status": "ok", "database": "connected"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur de connexion à la base de données: {str(e)}")
+        # On retourne 200 même en cas d'erreur de base de données pour permettre
+        # au healthcheck de docker de détecter que le service API est bien démarré
+        return {"status": "api_ok_db_error", "database": "disconnected", "error": str(e)}
 
 @app.post("/items/", response_model=ItemResponse)
 def create_item(item: ItemCreate, db: Session = Depends(get_db)):
